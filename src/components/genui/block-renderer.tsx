@@ -3,7 +3,7 @@
 import React from "react";
 import { BlockDefinition } from "@/types";
 import { blockRegistry } from "@/components/blocks";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 
 interface BlockRendererProps {
@@ -15,10 +15,16 @@ export function BlockRenderer({ block }: BlockRendererProps) {
 
   if (!Component) {
     return (
-      <Card className="flex flex-col items-center justify-center gap-2 p-6 text-center min-h-[120px]">
-        <AlertTriangle className="h-6 w-6 text-amber-500/70" />
-        <p className="text-sm font-medium text-zinc-400">Unknown block type</p>
-        <p className="text-xs text-zinc-600 font-mono">&ldquo;{block.type}&rdquo;</p>
+      <Card>
+        <div className="flex flex-col items-center justify-center gap-2 p-6 text-center min-h-[120px]">
+          <AlertTriangle className="h-5 w-5 text-amber-400/70" />
+          <p className="text-[13px] font-medium text-zinc-300">
+            Unknown block type
+          </p>
+          <p className="text-[11px] text-zinc-600 font-mono">
+            &ldquo;{block.type}&rdquo;
+          </p>
+        </div>
       </Card>
     );
   }
