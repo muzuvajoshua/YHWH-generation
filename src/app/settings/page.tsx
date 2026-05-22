@@ -1,57 +1,81 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Key, Palette, Bell } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Settings, User, Key, Palette, Bell, Eye, EyeOff } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Container,
+  PageHeader,
+} from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
-function Label({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) {
-  return (
-    <label htmlFor={htmlFor} className="block text-sm font-medium text-zinc-300 mb-1.5">
-      {children}
-    </label>
-  );
-}
-
-function Input({ id, type = "text", value, placeholder, className }: {
-  id?: string;
-  type?: string;
-  value?: string;
-  placeholder?: string;
-  className?: string;
+function Field({
+  label,
+  htmlFor,
+  hint,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  hint?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <input
-      id={id}
-      type={type}
-      defaultValue={value}
-      placeholder={placeholder}
-      className={cn(
-        "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500",
-        "focus:outline-none focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50",
-        "transition-colors duration-200",
-        className
-      )}
-    />
+    <div className="space-y-1.5">
+      <label
+        htmlFor={htmlFor}
+        className="block text-[12px] font-medium text-zinc-300"
+      >
+        {label}
+      </label>
+      {children}
+      {hint ? <p className="text-[11.5px] text-zinc-500">{hint}</p> : null}
+    </div>
   );
 }
 
-function Toggle({ defaultChecked = false, label }: { defaultChecked?: boolean; label: string }) {
+function Toggle({
+  label,
+  description,
+  defaultChecked = false,
+}: {
+  label: string;
+  description?: string;
+  defaultChecked?: boolean;
+}) {
   const [on, setOn] = useState(defaultChecked);
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/[0.06] last:border-0">
-      <span className="text-sm text-zinc-300">{label}</span>
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-white/[0.05] last:border-0">
+      <div className="min-w-0">
+        <p className="text-[13px] text-zinc-200 leading-tight">{label}</p>
+        {description ? (
+          <p className="mt-0.5 text-[11.5px] text-zinc-500 leading-snug">
+            {description}
+          </p>
+        ) : null}
+      </div>
       <button
+        role="switch"
+        aria-checked={on}
         onClick={() => setOn(!on)}
         className={cn(
-          "relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200",
-          on ? "bg-violet-600" : "bg-zinc-700"
+          "relative inline-flex h-[20px] w-[34px] shrink-0 items-center rounded-full transition-colors duration-150",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950",
+          on ? "bg-violet-500" : "bg-white/[0.1]"
         )}
       >
         <span
           className={cn(
-            "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200",
-            on ? "translate-x-4" : "translate-x-0.5"
+            "inline-block h-[14px] w-[14px] transform rounded-full bg-white shadow transition-transform duration-150",
+            on ? "translate-x-[17px]" : "translate-x-[3px]"
           )}
         />
       </button>
@@ -61,165 +85,196 @@ function Toggle({ defaultChecked = false, label }: { defaultChecked?: boolean; l
 
 export default function SettingsPage() {
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
+  const accents = [
+    { name: "Violet", color: "#8b5cf6" },
+    { name: "Indigo", color: "#6366f1" },
+    { name: "Emerald", color: "#10b981" },
+    { name: "Amber", color: "#f59e0b" },
+    { name: "Rose", color: "#ef4444" },
+    { name: "Pink", color: "#ec4899" },
+  ];
+  const themes = ["Midnight", "Slate", "Carbon"];
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-zinc-800 border border-white/[0.08]">
-          <Settings className="h-5 w-5 text-zinc-400" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white">Settings</h1>
-          <p className="text-sm text-zinc-400">Manage your account and application preferences</p>
-        </div>
-      </div>
+    <Container size="lg" className="py-6 lg:py-8 space-y-6">
+      <PageHeader
+        eyebrow="Settings"
+        title="Workspace settings"
+        description="Manage your profile, AI provider keys, appearance and notifications."
+        icon={<Settings className="h-4 w-4" />}
+      />
 
-      {/* Profile */}
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-violet-400" />
-            <CardTitle className="text-base">Profile</CardTitle>
+        <CardHeader>
+          <div className="flex items-center gap-2.5">
+            <User className="h-4 w-4 text-violet-300" />
+            <CardTitle>Profile</CardTitle>
           </div>
-          <CardDescription>Your personal information</CardDescription>
+          <CardDescription>How you appear inside Dashboard OS.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" value="Josh" />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" value="Anderson" />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="First name" htmlFor="firstName">
+              <Input id="firstName" defaultValue="Josh" />
+            </Field>
+            <Field label="Last name" htmlFor="lastName">
+              <Input id="lastName" defaultValue="Muzuva" />
+            </Field>
           </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value="josh@example.com" />
+          <Field label="Email" htmlFor="email">
+            <Input id="email" type="email" defaultValue="josh@example.com" />
+          </Field>
+          <Field label="Role" htmlFor="role">
+            <Input id="role" defaultValue="Product Manager" />
+          </Field>
+          <div className="pt-1">
+            <Button variant="accent">Save profile</Button>
           </div>
-          <div>
-            <Label htmlFor="role">Role</Label>
-            <Input id="role" value="Product Manager" />
-          </div>
-          <button className="mt-2 rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200">
-            Save Profile
-          </button>
         </CardContent>
       </Card>
 
-      {/* API Configuration */}
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <Key className="h-4 w-4 text-violet-400" />
-            <CardTitle className="text-base">API Configuration</CardTitle>
+        <CardHeader>
+          <div className="flex items-center gap-2.5">
+            <Key className="h-4 w-4 text-violet-300" />
+            <CardTitle>API configuration</CardTitle>
           </div>
-          <CardDescription>Connect your AI provider API keys</CardDescription>
+          <CardDescription>
+            Connect an AI provider to enable live dashboard generation.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="apiKey">Anthropic API Key</Label>
+          <Field
+            label="Anthropic API key"
+            htmlFor="apiKey"
+            hint="Stored encrypted at rest. Never logged or sent to other providers."
+          >
             <div className="relative">
               <Input
                 id="apiKey"
                 type={apiKeyVisible ? "text" : "password"}
-                value="sk-ant-api03-••••••••••••••••••••••••••••••••••••••••••••••••"
-                className="pr-20"
+                defaultValue="sk-ant-api03-••••••••••••••••••••••••••••••••••••••••"
+                className="pr-10 font-mono text-[12.5px]"
               />
               <button
-                onClick={() => setApiKeyVisible(!apiKeyVisible)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-zinc-200 transition-colors px-2 py-1"
+                type="button"
+                onClick={() => setApiKeyVisible((v) => !v)}
+                aria-label={apiKeyVisible ? "Hide API key" : "Show API key"}
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center text-zinc-400 hover:text-zinc-100 rounded-md hover:bg-white/[0.06]"
               >
-                {apiKeyVisible ? "Hide" : "Show"}
+                {apiKeyVisible ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
               </button>
             </div>
-            <p className="mt-1.5 text-xs text-zinc-500">
-              Used for AI workspace features. Stored securely and never logged.
-            </p>
-          </div>
-          <div>
-            <Label htmlFor="model">Default Model</Label>
+          </Field>
+          <Field label="Default model" htmlFor="model">
             <select
               id="model"
-              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50"
+              defaultValue="claude-sonnet-4-5"
+              className="flex h-9 w-full rounded-md border border-white/[0.08] bg-white/[0.03] px-3 text-[13px] text-zinc-100 transition-colors hover:border-white/[0.14] focus:outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/30"
             >
-              <option value="claude-opus-4-5">Claude Opus 4.5</option>
-              <option value="claude-sonnet-4-5" selected>Claude Sonnet 4.5</option>
-              <option value="claude-haiku-3-5">Claude Haiku 3.5</option>
+              <option value="claude-opus-4-7">Claude Opus 4.7</option>
+              <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+              <option value="claude-haiku-4-5">Claude Haiku 4.5</option>
             </select>
+          </Field>
+          <div className="pt-1">
+            <Button variant="accent">Save API settings</Button>
           </div>
-          <button className="rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200">
-            Save API Settings
-          </button>
         </CardContent>
       </Card>
 
-      {/* Appearance */}
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <Palette className="h-4 w-4 text-violet-400" />
-            <CardTitle className="text-base">Appearance</CardTitle>
+        <CardHeader>
+          <div className="flex items-center gap-2.5">
+            <Palette className="h-4 w-4 text-violet-300" />
+            <CardTitle>Appearance</CardTitle>
           </div>
-          <CardDescription>Customize the look and feel</CardDescription>
+          <CardDescription>Tune the look and feel.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Theme</Label>
-            <div className="grid grid-cols-3 gap-3 mt-2">
-              {["Dark", "Darker", "Midnight"].map((theme, i) => (
+        <CardContent className="space-y-5">
+          <Field label="Theme">
+            <div className="grid grid-cols-3 gap-2">
+              {themes.map((theme, i) => (
                 <button
                   key={theme}
                   className={cn(
-                    "rounded-lg border p-3 text-sm font-medium transition-all duration-200",
+                    "rounded-md border p-3 text-[13px] font-medium transition-all",
                     i === 0
-                      ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                      : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                      ? "border-violet-500/40 bg-violet-500/10 text-violet-200"
+                      : "border-white/[0.08] bg-white/[0.02] text-zinc-300 hover:border-white/[0.16] hover:bg-white/[0.05]"
                   )}
                 >
                   {theme}
                 </button>
               ))}
             </div>
-          </div>
-          <div>
-            <Label>Accent Color</Label>
-            <div className="flex gap-2 mt-2">
-              {["#8b5cf6", "#6366f1", "#10b981", "#f59e0b", "#ef4444", "#ec4899"].map((color) => (
+          </Field>
+          <Field label="Accent color">
+            <div className="flex flex-wrap gap-2.5">
+              {accents.map((accent, i) => (
                 <button
-                  key={color}
-                  style={{ backgroundColor: color }}
+                  key={accent.color}
+                  aria-label={accent.name}
+                  title={accent.name}
+                  style={{ backgroundColor: accent.color }}
                   className={cn(
-                    "w-7 h-7 rounded-full border-2 transition-transform hover:scale-110",
-                    color === "#8b5cf6" ? "border-white" : "border-transparent"
+                    "relative h-7 w-7 rounded-md ring-1 ring-inset ring-black/30 transition-transform hover:scale-110",
+                    i === 0
+                      ? "ring-2 ring-white/80 ring-offset-2 ring-offset-zinc-950"
+                      : ""
                   )}
                 />
               ))}
             </div>
-          </div>
+          </Field>
         </CardContent>
       </Card>
 
-      {/* Notifications */}
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <Bell className="h-4 w-4 text-violet-400" />
-            <CardTitle className="text-base">Notification Preferences</CardTitle>
+        <CardHeader>
+          <div className="flex items-center gap-2.5">
+            <Bell className="h-4 w-4 text-violet-300" />
+            <CardTitle>Notifications</CardTitle>
           </div>
-          <CardDescription>Choose what you want to be notified about</CardDescription>
+          <CardDescription>
+            Choose what should reach you and how.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <Toggle defaultChecked label="Email digest (weekly summary)" />
-          <Toggle defaultChecked label="Account health alerts" />
-          <Toggle defaultChecked label="AI workspace completions" />
-          <Toggle label="Marketing & product updates" />
-          <Toggle defaultChecked label="System maintenance notices" />
-          <Toggle label="Usage threshold warnings" />
+          <Toggle
+            defaultChecked
+            label="Weekly digest"
+            description="A Monday-morning summary of the week's most important metrics."
+          />
+          <Toggle
+            defaultChecked
+            label="Account health alerts"
+            description="Get pinged when a customer's health score drops below threshold."
+          />
+          <Toggle
+            defaultChecked
+            label="Workspace completions"
+            description="Notify when long-running AI generations finish."
+          />
+          <Toggle
+            label="Product updates"
+            description="Occasional changelog and feature announcements."
+          />
+          <Toggle
+            defaultChecked
+            label="System maintenance"
+            description="Scheduled downtime and infrastructure changes."
+          />
+          <Toggle
+            label="Usage threshold warnings"
+            description="Heads-up when API usage approaches your plan limit."
+          />
         </CardContent>
       </Card>
-    </div>
+    </Container>
   );
 }

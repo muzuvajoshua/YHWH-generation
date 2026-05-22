@@ -5,30 +5,49 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:pointer-events-none disabled:opacity-50 select-none",
+  [
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap select-none",
+    "text-[13px] font-medium leading-none",
+    "transition-[background,border,color,box-shadow] duration-150",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950",
+    "disabled:pointer-events-none disabled:opacity-50",
+  ].join(" "),
   {
     variants: {
       variant: {
+        // Quiet, sophisticated default — no gradient
         default:
-          "bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-violet-500/20 hover:from-blue-500 hover:to-violet-500 hover:shadow-violet-500/30 active:scale-[0.98]",
+          "bg-zinc-100 text-zinc-950 hover:bg-white border border-transparent",
+        // Subtle surface button
         secondary:
-          "bg-zinc-800 text-zinc-100 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:scale-[0.98]",
+          "bg-white/[0.06] text-zinc-100 border border-white/[0.08] hover:bg-white/[0.09] hover:border-white/[0.12]",
+        // Transparent — used for icon buttons and toolbar actions
         ghost:
-          "text-zinc-400 hover:bg-white/5 hover:text-zinc-100 active:scale-[0.98]",
+          "bg-transparent text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-100 border border-transparent",
+        // Outlined — for medium-importance secondary actions
         outline:
-          "border border-zinc-700 bg-transparent text-zinc-100 hover:bg-white/5 hover:border-zinc-600 active:scale-[0.98]",
+          "border border-white/[0.12] bg-transparent text-zinc-200 hover:bg-white/[0.04] hover:border-white/[0.18]",
+        // Accent — the brand action
+        accent:
+          "bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 shadow-[0_0_0_1px_rgba(139,92,246,0.2)_inset]",
+        // Destructive
         destructive:
-          "bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30 hover:text-red-300 hover:border-red-500/50 active:scale-[0.98]",
+          "bg-red-600/15 text-red-300 border border-red-500/30 hover:bg-red-600/22 hover:border-red-500/45",
+        // Link
+        link:
+          "bg-transparent text-violet-300 hover:text-violet-200 underline-offset-4 hover:underline border border-transparent px-0",
       },
       size: {
-        sm: "h-8 px-3 text-xs rounded-lg",
-        md: "h-10 px-4 py-2",
-        lg: "h-12 px-6 text-base rounded-xl",
-        icon: "h-10 w-10",
+        xs: "h-7 px-2.5 rounded-md text-[12px]",
+        sm: "h-8 px-3 rounded-md",
+        md: "h-9 px-3.5 rounded-md",
+        lg: "h-10 px-4 rounded-lg text-sm",
+        icon: "h-9 w-9 rounded-md",
+        "icon-sm": "h-8 w-8 rounded-md",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "secondary",
       size: "md",
     },
   }

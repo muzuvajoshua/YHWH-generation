@@ -18,6 +18,19 @@ An AI-native dashboard operating system built with Next.js 16, React 19, and the
 ### Block Types
 `kpi-card` · `line-chart` · `bar-chart` · `pie-chart` · `area-chart` · `table` · `insight-panel` · `activity-feed` · `comparison-card` · `metrics-widget` · `notes-panel` · `alert-panel`
 
+## Design System — "Lattice"
+
+A unified visual language inspired by Linear, Vercel and modern analytics tooling.
+
+- **Surfaces:** three semantic tiers (`surface-1` / `surface-2` / `surface-overlay`) declared as CSS custom properties in `globals.css`.
+- **Borders:** subtle / default / strong opacity tokens; no ad-hoc opacity values in components.
+- **Type scale:** Inter for prose and Inter Display for headings; JetBrains Mono for all numeric values (KPIs, table cells, axis ticks).
+- **Radii:** 6 / 8 / 12 / 16 — small / default / card / modal.
+- **Motion:** 150 / 220 / 320 ms paired with `cubic-bezier(0.16, 1, 0.3, 1)`.
+- **Accent:** a single violet accent; no gradient buttons.
+- **Layout helpers:** `<PageHeader />`, `<SectionHeader />`, `<Container />`, `<StatValue />`, `<StatTrend />` enforce consistency across pages.
+- **Responsive shell:** the sidebar collapses on desktop and becomes a swipe-friendly drawer on mobile; the top bar exposes a `⌘K` palette and notification controls.
+
 ## Tech Stack
 
 | Layer | Technology |

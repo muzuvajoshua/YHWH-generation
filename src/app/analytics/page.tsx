@@ -5,6 +5,11 @@ import { PieChartBlock } from "@/components/blocks/pie-chart-block";
 import { BarChartBlock } from "@/components/blocks/bar-chart-block";
 import { DataTableBlock } from "@/components/blocks/data-table-block";
 import {
+  Container,
+  PageHeader,
+  SectionHeader,
+} from "@/components/ui/page-header";
+import {
   revenueData,
   salesByRegion,
   marketingChannels,
@@ -13,85 +18,73 @@ import {
 
 export default function AnalyticsPage() {
   const revenueTrendsData = {
-    title: "Revenue Trends",
-    description: "Revenue, gross profit, and net income across the year",
+    title: "Revenue, costs and net profit",
+    description: "Twelve-month view with gross profit and net income overlays",
     data: revenueData,
     xKey: "name",
     yKeys: ["value", "value2", "value3"],
-    colors: ["#8b5cf6", "#6366f1", "#10b981"],
   };
 
   const salesByRegionData = {
-    title: "Sales by Region",
+    title: "Sales by region",
     description: "Revenue distribution across global markets",
     data: salesByRegion,
     xKey: "name",
     yKeys: ["value"],
-    colors: ["#8b5cf6", "#6366f1", "#10b981", "#f59e0b", "#ef4444"],
   };
 
   const marketingChannelsData = {
-    title: "Marketing Channels",
-    description: "Leads this month vs. last month by acquisition channel",
+    title: "Marketing channels",
+    description: "Leads this month versus last month by acquisition channel",
     data: marketingChannels,
     xKey: "name",
     yKeys: ["value", "value2"],
-    colors: ["#8b5cf6", "#6366f1"],
   };
 
   const customerTableData = {
-    title: "Customer Overview",
+    title: "Customer accounts",
     columns: [
       { key: "name", label: "Company", align: "left" as const },
       { key: "plan", label: "Plan", align: "left" as const },
       { key: "mrr", label: "MRR", align: "right" as const },
       { key: "status", label: "Status", align: "center" as const },
-      { key: "health", label: "Health Score", align: "right" as const },
+      { key: "health", label: "Health", align: "right" as const },
     ],
     rows: customerData,
   };
 
   return (
-    <div className="p-6 space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
-          <BarChart3 className="h-5 w-5 text-violet-400" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white">Analytics</h1>
-          <p className="text-sm text-zinc-400">
-            Deep-dive into your business performance metrics
-          </p>
-        </div>
-      </div>
+    <Container className="py-6 lg:py-8 space-y-8">
+      <PageHeader
+        eyebrow="Analytics"
+        title="Operational analytics"
+        description="Deep-dive into revenue, regional performance, channel attribution and customer accounts."
+        icon={<BarChart3 className="h-4 w-4" />}
+      />
 
-      {/* Revenue trends — full width */}
       <section>
-        <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-          Revenue Trends
-        </h2>
+        <SectionHeader title="Revenue trend" />
         <LineChartBlock data={revenueTrendsData} />
       </section>
 
-      {/* Pie + Bar side by side */}
       <section>
-        <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-          Distribution & Channels
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SectionHeader
+          title="Distribution and channels"
+          description="Where revenue comes from, and how leads are being acquired."
+        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
           <PieChartBlock data={salesByRegionData} />
           <BarChartBlock data={marketingChannelsData} />
         </div>
       </section>
 
-      {/* Customer table */}
-      <section>
-        <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-widest mb-4">
-          Customer Data
-        </h2>
+      <section className="pb-2">
+        <SectionHeader
+          title="Customer accounts"
+          description="Sortable view of MRR and account health across the book."
+        />
         <DataTableBlock data={customerTableData} />
       </section>
-    </div>
+    </Container>
   );
 }

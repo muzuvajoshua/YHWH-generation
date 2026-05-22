@@ -1,65 +1,66 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { InsightPanelData } from "@/types";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { Sparkles, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InsightPanelProps {
   data: InsightPanelData;
 }
 
-const sentimentConfig = {
+const sentimentMap = {
   positive: {
-    badge: "success" as const,
+    variant: "success" as const,
     label: "Positive",
-    glow: "from-emerald-600/5 to-transparent",
-    border: "border-emerald-500/10",
+    accent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
   },
   negative: {
-    badge: "destructive" as const,
-    label: "Negative",
-    glow: "from-red-600/5 to-transparent",
-    border: "border-red-500/10",
+    variant: "destructive" as const,
+    label: "Needs attention",
+    accent: "text-red-400 bg-red-500/10 border-red-500/20",
   },
   neutral: {
-    badge: "secondary" as const,
+    variant: "secondary" as const,
     label: "Neutral",
-    glow: "from-zinc-600/5 to-transparent",
-    border: "border-zinc-500/10",
+    accent: "text-zinc-400 bg-white/[0.04] border-white/[0.08]",
   },
 };
 
 export function InsightPanel({ data }: InsightPanelProps) {
   const { title, summary, bullets, sentiment } = data;
-  const config = sentiment ? sentimentConfig[sentiment as keyof typeof sentimentConfig] : null;
+  const config = sentiment ? sentimentMap[sentiment as keyof typeof sentimentMap] : null;
 
   return (
-    <Card className={cn("relative overflow-hidden", config?.border)}>
-      {config && (
-        <div className={cn("absolute inset-0 bg-gradient-to-br pointer-events-none", config.glow)} />
-      )}
-      <CardHeader className="pb-3">
+    <Card>
+      <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20">
-              <Sparkles className="w-4 h-4 text-violet-400" />
-            </div>
-            <CardTitle>{title}</CardTitle>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-violet-500/25 bg-violet-500/12 text-violet-300 shrink-0">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            <CardTitle className="truncate">{title}</CardTitle>
           </div>
-          {config && (
-            <Badge variant={config.badge} className="text-xs">
+          {config ? (
+            <Badge variant={config.variant} className="shrink-0">
               {config.label}
             </Badge>
-          )}
+          ) : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-zinc-300 leading-relaxed">{summary}</p>
+        <p className="text-[13.5px] text-zinc-300 leading-relaxed">{summary}</p>
         {bullets.length > 0 && (
-          <ul className="space-y-2">
+          <ul className="space-y-2.5">
             {bullets.map((bullet: string, i: number) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-zinc-400">
-                <CheckCircle2 className="w-4 h-4 text-violet-400 mt-0.5 flex-shrink-0" />
+              <li key={i} className="flex items-start gap-2.5 text-[13px] text-zinc-400">
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border",
+                    config?.accent ?? "text-violet-300 bg-violet-500/10 border-violet-500/20"
+                  )}
+                >
+                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                </span>
                 <span className="leading-relaxed">{bullet}</span>
               </li>
             ))}
