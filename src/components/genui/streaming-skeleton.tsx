@@ -1,89 +1,77 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 function ThinkingDots() {
-  const [dots, setDots] = useState(1);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots((d) => (d % 3) + 1);
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <span className="inline-flex gap-0.5 items-end h-4">
-      {[1, 2, 3].map((i) => (
+    <span className="inline-flex gap-1 items-center">
+      {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          animate={{ opacity: i <= dots ? 1 : 0.2, y: i <= dots ? -2 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="block w-1 h-1 rounded-full bg-violet-400"
+          animate={{ opacity: [0.25, 1, 0.25], y: [0, -1.5, 0] }}
+          transition={{
+            duration: 1.1,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 0.18,
+          }}
+          className="block w-[5px] h-[5px] rounded-full bg-violet-400"
         />
       ))}
     </span>
   );
 }
 
-// Skeleton layout: mimic a small dashboard grid
 const skeletonBlocks = [
-  { span: 1, height: "h-24" },
-  { span: 1, height: "h-24" },
-  { span: 1, height: "h-24" },
-  { span: 1, height: "h-24" },
-  { span: 2, height: "h-48" },
-  { span: 2, height: "h-48" },
-  { span: 4, height: "h-36" },
+  { span: 1, height: "h-[110px]" },
+  { span: 1, height: "h-[110px]" },
+  { span: 1, height: "h-[110px]" },
+  { span: 1, height: "h-[110px]" },
+  { span: 2, height: "h-[220px]" },
+  { span: 2, height: "h-[220px]" },
 ];
 
 export function StreamingSkeleton() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.24 }}
       className="w-full space-y-4"
     >
-      {/* Thinking header */}
-      <div className="flex items-center gap-2.5 text-sm text-zinc-400">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-600/20 border border-violet-500/30">
-          <span className="text-xs">✦</span>
-        </div>
-        <span>AI is thinking</span>
+      <div className="flex items-center gap-2.5 text-[12.5px] text-zinc-400">
         <ThinkingDots />
+        <span>Composing your dashboard…</span>
       </div>
 
-      {/* Skeleton header */}
       <div className="space-y-2">
-        <Skeleton className="h-5 w-48 rounded-md" />
-        <Skeleton className="h-3.5 w-72 rounded-md" />
+        <Skeleton className="h-4 w-44 rounded" />
+        <Skeleton className="h-3 w-72 rounded" />
       </div>
 
-      {/* Skeleton grid */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         {skeletonBlocks.map((block, i) => (
           <div
             key={i}
             className={cn(
-              "rounded-xl border border-white/5 bg-white/[0.03] overflow-hidden",
+              "rounded-xl border border-white/[0.06] bg-white/[0.025] overflow-hidden",
               block.height,
               block.span === 1 && "col-span-1",
-              block.span === 2 && "col-span-2",
-              block.span === 4 && "col-span-4"
+              block.span === 2 && "col-span-2 sm:col-span-2"
             )}
           >
-            <div className="p-4 space-y-3 h-full">
-              <Skeleton className="h-3.5 w-24 rounded" />
-              <Skeleton className="h-6 w-16 rounded" />
+            <div className="p-4 space-y-3 h-full flex flex-col">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-3 w-20 rounded" />
+                <Skeleton className="h-6 w-6 rounded-md" />
+              </div>
+              <Skeleton className="h-7 w-24 rounded" />
               {block.span >= 2 && (
-                <div className="flex-1 space-y-2 pt-2">
-                  <Skeleton className="h-full w-full rounded" style={{ minHeight: 80 }} />
-                </div>
+                <Skeleton className="flex-1 w-full rounded mt-2" />
               )}
             </div>
           </div>
