@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { ChartBlockData } from "@/types";
 import {
   ResponsiveContainer,
@@ -12,72 +18,62 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { TooltipContentProps } from "recharts/types/component/Tooltip";
-import { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
-
-const DEFAULT_COLORS = ["#818cf8", "#a78bfa", "#34d399", "#f472b6", "#fb923c"];
+import {
+  CHART_PALETTE,
+  CHART_GRID,
+  CHART_AXIS,
+  CHART_TICK,
+  ChartTooltip,
+} from "./chart-shared";
 
 interface LineChartBlockProps {
   data: ChartBlockData;
 }
 
-function CustomTooltip({ active, payload, label }: TooltipContentProps<ValueType, NameType>) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-lg border border-white/10 bg-zinc-900/95 backdrop-blur-sm px-3 py-2 shadow-xl">
-      <p className="text-xs font-medium text-zinc-400 mb-1.5">{String(label ?? "")}</p>
-      {payload.map((entry, i) => (
-        <div key={i} className="flex items-center gap-2 text-xs">
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-zinc-300 capitalize">{String(entry.dataKey ?? "")}</span>
-          <span className="font-semibold text-white ml-auto pl-3">{String(entry.value ?? "")}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function LineChartBlock({ data }: LineChartBlockProps) {
   const { title, description, data: chartData, colors } = data;
   const yKeys = data.yKeys?.length ? data.yKeys : ["value"];
-  const resolvedColors = colors?.length ? colors : DEFAULT_COLORS;
+  const palette = colors?.length ? colors : CHART_PALETTE;
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-2">
+    <Card>
+      <CardHeader>
         <CardTitle>{title}</CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent>
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <defs>
-              {yKeys.map((key: string, i: number) => (
-                <linearGradient key={key} id={`line-gradient-${i}`} x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor={resolvedColors[i % resolvedColors.length]} stopOpacity={0.8} />
-                  <stop offset="100%" stopColor={resolvedColors[(i + 1) % resolvedColors.length]} stopOpacity={0.8} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <LineChart
+            data={chartData}
+            margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+          >
+            <CartesianGrid stroke={CHART_GRID} vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fill: "#71717a", fontSize: 11 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.05)" }}
+              tick={{ fill: CHART_TICK, fontSize: 11 }}
+              axisLine={{ stroke: CHART_AXIS }}
               tickLine={false}
+              dy={6}
             />
             <YAxis
-              tick={{ fill: "#71717a", fontSize: 11 }}
+              tick={{ fill: CHART_TICK, fontSize: 11 }}
               axisLine={false}
               tickLine={false}
+              width={50}
             />
-            <Tooltip content={(props) => <CustomTooltip {...props} />} />
+            <Tooltip
+              content={(props) => <ChartTooltip {...props} />}
+              cursor={{ stroke: "rgba(255,255,255,0.08)", strokeDasharray: 3 }}
+            />
             {yKeys.length > 1 && (
               <Legend
-                wrapperStyle={{ paddingTop: "12px", fontSize: "12px", color: "#a1a1aa" }}
+                wrapperStyle={{
+                  paddingTop: "10px",
+                  fontSize: "11px",
+                  color: "#a1a1aa",
+                }}
+                iconType="circle"
+                iconSize={8}
               />
             )}
             {yKeys.map((key: string, i: number) => (
@@ -85,12 +81,12 @@ export function LineChartBlock({ data }: LineChartBlockProps) {
                 key={key}
                 type="monotone"
                 dataKey={key}
-                stroke={`url(#line-gradient-${i})`}
-                strokeWidth={2.5}
+                stroke={palette[i % palette.length]}
+                strokeWidth={2}
                 dot={false}
                 activeDot={{
                   r: 4,
-                  fill: resolvedColors[i % resolvedColors.length],
+                  fill: palette[i % palette.length],
                   strokeWidth: 0,
                 }}
               />
