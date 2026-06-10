@@ -51,8 +51,7 @@ export default function ReportsPage() {
       },
       {
         level: "info" as const,
-        message:
-          "Scheduled maintenance window: May 10, 02:00–04:00 UTC",
+        message: "Scheduled maintenance window: May 10, 02:00–04:00 UTC",
       },
       {
         level: "success" as const,

@@ -50,9 +50,18 @@
   /* Motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast: 150ms;
   --duration-base: 220ms;
   --duration-slow: 320ms;
+  --duration-cinematic: 640ms;
+
+  /* Marketing surfaces */
+  --aurora-violet: rgba(139, 92, 246, 0.45);
+  --aurora-cyan: rgba(34, 211, 238, 0.32);
+  --aurora-emerald: rgba(52, 211, 153, 0.22);
+  --aurora-pink: rgba(244, 114, 182, 0.22);
+  --grid-line: rgba(255, 255, 255, 0.045);
 }
 
 html {
@@ -159,11 +168,129 @@ body {
   background-size: 22px 22px;
 }
 
-/* Prevent layout shift on hover transforms */
+/* ─────────────────────────────────────────────────────────────
+   Marketing motion + surface utilities
+   Used by the landing page, auth shell, and feature sections.
+   Keep these here — they are token-level decisions, not component CSS.
+   ───────────────────────────────────────────────────────────── */
+
+/* Aurora — a slow, layered, cinematic gradient background.
+   Powered by background-position drift so it stays GPU-cheap. */
+@keyframes aurora-drift {
+  0%   { background-position: 0% 50%, 100% 50%, 50% 0%; }
+  50%  { background-position: 100% 50%, 0% 50%, 50% 100%; }
+  100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+}
+.aurora {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60% 60% at 20% 30%, var(--aurora-violet), transparent 60%),
+    radial-gradient(50% 50% at 80% 70%, var(--aurora-cyan), transparent 60%),
+    radial-gradient(45% 45% at 50% 90%, var(--aurora-emerald), transparent 60%);
+  background-size: 180% 180%, 180% 180%, 180% 180%;
+  animation: aurora-drift 28s var(--ease-in-out) infinite;
+}
+
+/* Conic spotlight for hero feature cards */
+.spotlight {
+  background-image:
+    conic-gradient(
+      from 200deg at 50% 50%,
+      rgba(139, 92, 246, 0.18),
+      transparent 35%,
+      rgba(56, 189, 248, 0.12),
+      transparent 70%
+    );
+}
+
+/* Static grid overlay for premium product surfaces */
+.grid-pattern {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(closest-side at 50% 50%, black, transparent 95%);
+  -webkit-mask-image: radial-gradient(closest-side at 50% 50%, black, transparent 95%);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(180deg, #f4f4f5 0%, #a1a1aa 130%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-violet {
+  background: linear-gradient(120deg, #c4b5fd 0%, #f4f4f5 45%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Marquee — for logo / testimonial rails */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee {
+  animation: marquee 36s linear infinite;
+  will-change: transform;
+}
+.marquee-pause:hover .marquee { animation-play-state: paused; }
+
+/* Caret blink — used in hero typewriter accent */
+@keyframes caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.caret { animation: caret-blink 1s steps(1) infinite; }
+
+/* Soft float — for ambient hero card hover */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.float-soft { animation: float-soft 6s var(--ease-in-out) infinite; }
+
+/* Conic spin — for the ⌘K mark and accent rings */
+@keyframes conic-spin { to { transform: rotate(1turn); } }
+.conic-spin { animation: conic-spin 8s linear infinite; }
+
+/* Reveal helpers: triggered by data-state="in-view" set by the <Reveal/> primitive.
+   Falls back gracefully on the server (visible by default) so SSR is correct. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 600ms var(--ease-out),
+    transform 600ms var(--ease-out);
+  will-change: opacity, transform;
+}
+.reveal[data-state="in-view"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger orchestration uses a custom property --stagger-i set by JS */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 520ms var(--ease-out) calc(var(--stagger-i, 0) * 60ms),
+    transform 520ms var(--ease-out) calc(var(--stagger-i, 0) * 60ms);
+}
+.stagger-item[data-state="in-view"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion — global escape hatch. Last so it overrides everything. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  .reveal, .stagger-item {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

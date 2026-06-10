@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, User, Key, Palette, Bell, Eye, EyeOff } from "lucide-react";
+import { User, Key, Palette, Bell, Eye, EyeOff } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,10 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Container,
-  PageHeader,
-} from "@/components/ui/page-header";
 import { cn } from "@/lib/utils";
 
 function Field({
@@ -65,6 +61,7 @@ function Toggle({
       <button
         role="switch"
         aria-checked={on}
+        aria-label={label}
         onClick={() => setOn(!on)}
         className={cn(
           "relative inline-flex h-[20px] w-[34px] shrink-0 items-center rounded-full transition-colors duration-150",
@@ -83,7 +80,12 @@ function Toggle({
   );
 }
 
-export default function SettingsPage() {
+interface SettingsFormProps {
+  initialName: string;
+  initialEmail: string;
+}
+
+export function SettingsForm({ initialName, initialEmail }: SettingsFormProps) {
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
   const accents = [
     { name: "Violet", color: "#8b5cf6" },
@@ -95,15 +97,11 @@ export default function SettingsPage() {
   ];
   const themes = ["Midnight", "Slate", "Carbon"];
 
-  return (
-    <Container size="lg" className="py-6 lg:py-8 space-y-6">
-      <PageHeader
-        eyebrow="Settings"
-        title="Workspace settings"
-        description="Manage your profile, AI provider keys, appearance and notifications."
-        icon={<Settings className="h-4 w-4" />}
-      />
+  const [firstName, ...rest] = initialName ? initialName.split(" ") : [""];
+  const lastName = rest.join(" ");
 
+  return (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2.5">
@@ -115,14 +113,14 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="First name" htmlFor="firstName">
-              <Input id="firstName" defaultValue="Josh" />
+              <Input id="firstName" defaultValue={firstName} />
             </Field>
             <Field label="Last name" htmlFor="lastName">
-              <Input id="lastName" defaultValue="Muzuva" />
+              <Input id="lastName" defaultValue={lastName} />
             </Field>
           </div>
           <Field label="Email" htmlFor="email">
-            <Input id="email" type="email" defaultValue="josh@example.com" />
+            <Input id="email" type="email" defaultValue={initialEmail} />
           </Field>
           <Field label="Role" htmlFor="role">
             <Input id="role" defaultValue="Product Manager" />
@@ -173,7 +171,7 @@ export default function SettingsPage() {
           <Field label="Default model" htmlFor="model">
             <select
               id="model"
-              defaultValue="claude-sonnet-4-5"
+              defaultValue="claude-sonnet-4-6"
               className="flex h-9 w-full rounded-md border border-white/[0.08] bg-white/[0.03] px-3 text-[13px] text-zinc-100 transition-colors hover:border-white/[0.14] focus:outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/30"
             >
               <option value="claude-opus-4-7">Claude Opus 4.7</option>
@@ -275,6 +273,6 @@ export default function SettingsPage() {
           />
         </CardContent>
       </Card>
-    </Container>
+    </div>
   );
 }

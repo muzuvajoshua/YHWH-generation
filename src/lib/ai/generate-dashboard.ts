@@ -1,5 +1,6 @@
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { generateObject } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { z } from "zod";
 import { DashboardLayout } from "@/types";
 import { SYSTEM_PROMPT } from "./system-prompt";
 
@@ -8,11 +9,33 @@ export interface ConversationMessage {
   content: string;
 }
 
+/**
+ * Strict structured output: the model returns an envelope { textResponse, dashboard }
+ * conforming to the schema below. The dashboard payload itself uses the
+ * existing block-typed DashboardLayout schema — same one the renderer trusts.
+ *
+ * Provider: Anthropic (Claude). The settings UI advertises Anthropic, so the
+ * runtime should honor that. AI failures fall back to a deterministic
+ * keyword-routed dashboard upstream — see /api/chat and /api/generate.
+ */
+const ResponseEnvelope = z.object({
+  textResponse: z.string().min(1),
+  dashboard: DashboardLayout,
+});
+type ResponseEnvelope = z.infer<typeof ResponseEnvelope>;
+
+const MODEL_ID =
+  process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5-20250929";
+
 export async function generateDashboard(
   userMessage: string,
   history: ConversationMessage[] = []
 ): Promise<{ content: string; dashboard: DashboardLayout }> {
-  // Build conversation context from history
+  if (!process.env.ANTHROPIC_API_KEY) {
+    // Bail loudly so the route falls back to the deterministic dashboard.
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+
   const historyContext =
     history.length > 0
       ? `\n\nCONVERSATION SO FAR:\n${history
@@ -20,47 +43,19 @@ export async function generateDashboard(
           .join("\n")}\n\nThe user is now following up. Build on the context above. If they ask to modify, refine, or drill into something, adjust the previous dashboard rather than starting fresh.`
       : "";
 
-  const result = await generateText({
-    model: openai("gpt-4o"),
-    system:
-      SYSTEM_PROMPT +
-      `\n\nYou MUST respond with ONLY a valid JSON object (no markdown, no code fences) in this exact shape:
-{
-  "textResponse": "Brief 2-3 sentence explanation with specific numbers from the data",
-  "dashboard": {
-    "title": "Dashboard Title",
-    "description": "Dashboard description",
-    "blocks": [
-      {
-        "id": "unique-id",
-        "type": "one of the block types listed above",
-        "span": 1-4,
-        "data": { ... block-specific data ... }
-      }
-    ]
-  }
-}
-
-Block data schemas:
-- kpi-card: { title, value, change (number), changeLabel?, trend: "up"|"down"|"flat", icon? }
-- line-chart/bar-chart/area-chart: { title, description?, data: [{ name, value, value2?, value3? }], xKey?, yKeys?, colors? }
-- pie-chart: { title, description?, data: [{ name, value }], xKey?, yKeys?, colors? }
-- table: { title, columns: [{ key, label, align? }], rows: [{ ...key-value pairs }] }
-- insight-panel: { title, summary, bullets: string[], sentiment?: "positive"|"negative"|"neutral" }
-- activity-feed: { title, items: [{ id, user, action, target, time }] }
-- comparison-card: { title, items: [{ label, value, previousValue }] }
-- metrics-widget: { title, metrics: [{ label, value, unit? }] }
-- notes-panel: { title, content }
-- alert-panel: { title, alerts: [{ level: "info"|"warning"|"error"|"success", message }] }`,
-    prompt: `${historyContext}\n\nUser request: "${userMessage}"
-
-Use the REAL company data provided in the system prompt. Do not invent numbers. Respond with ONLY the JSON object.`,
+  const result = await generateObject<typeof ResponseEnvelope>({
+    model: anthropic(MODEL_ID),
+    schema: ResponseEnvelope,
+    schemaName: "DashboardResponse",
+    schemaDescription:
+      "A short text explanation plus a fully-typed dashboard layout for the renderer.",
+    system: SYSTEM_PROMPT,
+    prompt: `${historyContext}\n\nUser request: "${userMessage}"\n\nUse the REAL company data provided in the system prompt. Do not invent numbers.`,
+    maxRetries: 2,
   });
 
-  const parsed = JSON.parse(result.text);
-
   return {
-    content: parsed.textResponse,
-    dashboard: parsed.dashboard as DashboardLayout,
+    content: result.object.textResponse,
+    dashboard: result.object.dashboard,
   };
 }

@@ -60,13 +60,24 @@ npm run dev
 npm run build && npm start
 ```
 
-## Pages
+## Routes
 
-- **/** — Dashboard home with KPIs, charts, and activity feed
-- **/analytics** — Revenue trends, regional breakdown, marketing channels
-- **/workspace** — AI chat interface for generating custom dashboards
-- **/reports** — Pre-built reports with team productivity and tasks
-- **/settings** — Configuration (profile, API key, appearance)
+Marketing surface (public):
+- **/** — Cinematic landing: hero, feature bento, product preview, pricing, testimonials, CTA
+- **/signin** — Split-screen sign-in (Server Action + zod-validated form state)
+- **/signup** — Split-screen sign-up
+
+App surface (gated, `/app/*`):
+- **/app** — Dashboard home with KPIs, charts, and activity feed
+- **/app/analytics** — Revenue trends, regional breakdown, marketing channels
+- **/app/workspace** — AI chat interface for generating custom dashboards
+- **/app/reports** — Pre-built reports with team productivity and tasks
+- **/app/settings** — Configuration (profile, API key, appearance, sign-out)
+
+Routes are split by route group: `(app)/layout.tsx` requires a session and
+mounts the dashboard shell. Marketing routes live at the top level with their
+own nav and footer. A mock session cookie (`src/lib/auth/session.ts`) gates
+the `(app)` group; swap it for your real provider without touching the UI.
 
 ## AI System
 
@@ -96,19 +107,50 @@ Set `ANTHROPIC_API_KEY` in your Vercel environment variables for live AI.
 
 ```
 src/
-├── app/              # Next.js App Router pages
-│   ├── api/          # AI route handlers
-│   ├── analytics/    # Analytics page
-│   ├── workspace/    # AI chat workspace
-│   ├── reports/      # Reports page
-│   └── settings/     # Settings page
+├── app/
+│   ├── layout.tsx           # Root <html><body>, fonts
+│   ├── template.tsx         # Pass-through (route-group layouts own chrome)
+│   ├── globals.css          # Lattice tokens + marketing motion + aurora/grid
+│   ├── page.tsx             # Marketing landing
+│   ├── signin/page.tsx      # Auth: sign in
+│   ├── signup/page.tsx      # Auth: sign up
+│   ├── api/
+│   │   ├── chat/route.ts    # zod-validated, { ok, data } envelope
+│   │   └── generate/route.ts
+│   └── (app)/               # Gated dashboard route group
+│       ├── layout.tsx       # requireSession() → mount AppShell
+│       └── app/
+│           ├── page.tsx
+│           ├── analytics/
+│           ├── workspace/
+│           ├── reports/
+│           └── settings/
 ├── components/
-│   ├── blocks/       # Dashboard block components
-│   ├── genui/        # Generative UI (renderer, grid, chat)
-│   ├── shell/        # App shell (sidebar, topbar, cmd palette)
-│   └── ui/           # Primitive UI components
+│   ├── blocks/              # 12 typed, registry-rendered dashboard blocks
+│   ├── genui/               # Streaming chat, grid, renderer, skeleton
+│   ├── shell/               # AppShell, Sidebar, TopBar, CommandPalette
+│   ├── marketing/           # Hero, FeaturesBento, ProductPreview, Pricing…
+│   ├── auth/                # AuthShell + Sign-in / Sign-up forms
+│   ├── motion/              # Reveal, StaggerGroup, Magnetic, Parallax
+│   ├── settings/            # SettingsForm (client island)
+│   └── ui/                  # Primitives (Card, Button, Dialog, …)
 ├── lib/
-│   ├── ai/           # AI orchestration layer
-│   └── data/         # Mock datasets
-└── types/            # TypeScript types & Zod schemas
+│   ├── ai/                  # Anthropic via generateObject + zod schema
+│   ├── api/                 # JSON envelope helpers (ok/fail/parseJson)
+│   ├── auth/                # session.ts (server-only), types.ts, actions.ts
+│   ├── data/                # Mock datasets
+│   └── utils.ts
+└── types/                   # Block schemas & DashboardLayout (zod)
 ```
+
+### Design system — motion grammar
+
+`globals.css` defines the Lattice tokens *and* the motion grammar:
+`aurora`, `spotlight`, `grid-pattern`, `text-gradient[-violet]`,
+`marquee`, `caret`, `float-soft`, `reveal`, `stagger-item`. The
+`reduced-motion` media query disables every one — accessibility first.
+
+`components/motion/` provides three primitives composed everywhere:
+- `<Reveal>` — IntersectionObserver-driven fade-up, SSR-safe.
+- `<StaggerGroup>` — annotates children with a `--stagger-i` index for cascading reveals.
+- `<Magnetic>` — pointer-only cursor attraction. No-ops on touch + reduced-motion.

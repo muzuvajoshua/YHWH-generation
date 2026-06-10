@@ -16,11 +16,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Home", icon: Home, href: "/" },
-  { label: "Analytics", icon: BarChart3, href: "/analytics" },
-  { label: "Workspace", icon: BrainCircuit, href: "/workspace" },
-  { label: "Reports", icon: FileText, href: "/reports" },
-  { label: "Settings", icon: Settings, href: "/settings" },
+  { label: "Home", icon: Home, href: "/app" },
+  { label: "Analytics", icon: BarChart3, href: "/app/analytics" },
+  { label: "Workspace", icon: BrainCircuit, href: "/app/workspace" },
+  { label: "Reports", icon: FileText, href: "/app/reports" },
+  { label: "Settings", icon: Settings, href: "/app/settings" },
 ] as const;
 
 interface SidebarProps {
@@ -48,10 +48,11 @@ export function Sidebar({
         className
       )}
     >
-      {/* Brand */}
-      <div
+      <Link
+        href="/app"
+        onClick={onNavigate}
         className={cn(
-          "flex h-14 items-center gap-2.5 border-b border-white/[0.06]",
+          "flex h-14 items-center gap-2.5 border-b border-white/[0.06] focus-visible:outline-none",
           collapsed ? "justify-center px-2" : "px-4"
         )}
       >
@@ -63,9 +64,8 @@ export function Sidebar({
             Dashboard OS
           </span>
         )}
-      </div>
+      </Link>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3">
         {!collapsed && (
           <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
@@ -74,13 +74,16 @@ export function Sidebar({
         )}
         <ul className={cn("space-y-0.5", collapsed ? "px-2" : "px-2")}>
           {navItems.map(({ label, icon: Icon, href }) => {
-            const isActive = pathname === href;
+            const isActive =
+              pathname === href ||
+              (href !== "/app" && pathname.startsWith(href));
             return (
               <li key={href}>
                 <Link
                   href={href}
                   onClick={onNavigate}
                   title={collapsed ? label : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "relative flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium",
                     "transition-colors duration-150",
@@ -113,7 +116,6 @@ export function Sidebar({
         </ul>
       </nav>
 
-      {/* Footer */}
       <div className="border-t border-white/[0.06] p-2">
         <button
           onClick={onToggleCollapse}
