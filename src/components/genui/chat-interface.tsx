@@ -145,16 +145,21 @@ export function ChatInterface() {
           body: JSON.stringify({ message: trimmed, history }),
         });
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload: {
+          ok: boolean;
+          data?: { content: string; dashboard?: DashboardLayout | null };
+          error?: { code: string; message: string };
+        } = await res.json();
 
-        const data: { content: string; dashboard: DashboardLayout | null } =
-          await res.json();
+        if (!res.ok || !payload.ok || !payload.data) {
+          throw new Error(payload.error?.message ?? `HTTP ${res.status}`);
+        }
 
         const assistantMsg: ChatMessage = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: data.content,
-          dashboard: data.dashboard ?? undefined,
+          content: payload.data.content,
+          dashboard: payload.data.dashboard ?? undefined,
           createdAt: new Date(),
         };
 
