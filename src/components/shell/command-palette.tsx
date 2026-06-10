@@ -40,7 +40,7 @@ const allItems: CommandItem[] = [
     icon: <LayoutDashboard className="h-3.5 w-3.5" />,
     shortcut: "N",
     section: "Quick actions",
-    href: "/workspace",
+    href: "/app/workspace",
   },
   {
     id: "refresh",
@@ -64,7 +64,7 @@ const allItems: CommandItem[] = [
     icon: <Home className="h-3.5 w-3.5" />,
     shortcut: "G H",
     section: "Navigation",
-    href: "/",
+    href: "/app",
   },
   {
     id: "nav-analytics",
@@ -72,7 +72,7 @@ const allItems: CommandItem[] = [
     icon: <BarChart3 className="h-3.5 w-3.5" />,
     shortcut: "G A",
     section: "Navigation",
-    href: "/analytics",
+    href: "/app/analytics",
   },
   {
     id: "nav-workspace",
@@ -80,7 +80,7 @@ const allItems: CommandItem[] = [
     icon: <BrainCircuit className="h-3.5 w-3.5" />,
     shortcut: "G W",
     section: "Navigation",
-    href: "/workspace",
+    href: "/app/workspace",
   },
   {
     id: "nav-reports",
@@ -88,7 +88,7 @@ const allItems: CommandItem[] = [
     icon: <FileText className="h-3.5 w-3.5" />,
     shortcut: "G R",
     section: "Navigation",
-    href: "/reports",
+    href: "/app/reports",
   },
   {
     id: "nav-settings",
@@ -96,7 +96,7 @@ const allItems: CommandItem[] = [
     icon: <Settings className="h-3.5 w-3.5" />,
     shortcut: "G S",
     section: "Navigation",
-    href: "/settings",
+    href: "/app/settings",
   },
   // AI suggestions
   {
@@ -105,7 +105,7 @@ const allItems: CommandItem[] = [
     description: "Generate a revenue performance dashboard",
     icon: <TrendingUp className="h-3.5 w-3.5" />,
     section: "AI suggestions",
-    href: "/workspace",
+    href: "/app/workspace",
   },
   {
     id: "ai-marketing",
@@ -113,7 +113,7 @@ const allItems: CommandItem[] = [
     description: "Analyze campaign performance and channels",
     icon: <Sparkles className="h-3.5 w-3.5" />,
     section: "AI suggestions",
-    href: "/workspace",
+    href: "/app/workspace",
   },
   {
     id: "ai-users",
@@ -121,7 +121,7 @@ const allItems: CommandItem[] = [
     description: "User acquisition and retention",
     icon: <Users className="h-3.5 w-3.5" />,
     section: "AI suggestions",
-    href: "/workspace",
+    href: "/app/workspace",
   },
   {
     id: "ai-productivity",
@@ -129,7 +129,7 @@ const allItems: CommandItem[] = [
     description: "Team performance metrics quarter-over-quarter",
     icon: <BarChart3 className="h-3.5 w-3.5" />,
     section: "AI suggestions",
-    href: "/workspace",
+    href: "/app/workspace",
   },
 ];
 
@@ -177,12 +177,15 @@ export function CommandPalette({
     return () => window.removeEventListener("keydown", handler);
   }, [isOpen, setIsOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
+  // Reset query and selection whenever the palette closes.
+  const [lastOpen, setLastOpen] = useState(isOpen);
+  if (lastOpen !== isOpen) {
+    setLastOpen(isOpen);
+    if (!isOpen && (query !== "" || selectedIndex !== 0)) {
       setQuery("");
       setSelectedIndex(0);
     }
-  }, [isOpen]);
+  }
 
   const filtered = useMemo(() => {
     if (!query.trim()) return allItems;
@@ -222,7 +225,11 @@ export function CommandPalette({
     return () => window.removeEventListener("keydown", handler);
   }, [isOpen, filtered, selectedIndex, runItem]);
 
-  useEffect(() => setSelectedIndex(0), [query]);
+  const [lastQuery, setLastQuery] = useState(query);
+  if (lastQuery !== query) {
+    setLastQuery(query);
+    if (selectedIndex !== 0) setSelectedIndex(0);
+  }
 
   return (
     <DialogPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
