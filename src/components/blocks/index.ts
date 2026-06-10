@@ -27,7 +27,11 @@ import { MetricsWidget } from "./metrics-widget";
 import { NotesPanel } from "./notes-panel";
 import { AlertPanel } from "./alert-panel";
 
-export const blockRegistry: Record<BlockType, React.ComponentType<{ data: any }>> = {
+// The block registry maps a block type discriminator to its renderer. Each
+// renderer accepts its own typed `data` payload; the AI route validates the
+// payload against the matching schema before it ever reaches the renderer.
+type AnyBlockRenderer = React.ComponentType<{ data: unknown }>;
+export const blockRegistry = {
   "kpi-card": KpiCard,
   "line-chart": LineChartBlock,
   "bar-chart": BarChartBlock,
@@ -40,4 +44,4 @@ export const blockRegistry: Record<BlockType, React.ComponentType<{ data: any }>
   "metrics-widget": MetricsWidget,
   "notes-panel": NotesPanel,
   "alert-panel": AlertPanel,
-};
+} as Record<BlockType, AnyBlockRenderer>;
