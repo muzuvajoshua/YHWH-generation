@@ -1,23 +1,37 @@
 "use client";
 
 import React from "react";
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, LogOut, Menu, Search, Settings as SettingsIcon, User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/lib/auth/actions";
+import { initials, type Session } from "@/lib/auth/types";
 
 interface TopBarProps {
   pageName?: string;
+  user: Session;
   onOpenCommandPalette?: () => void;
   onOpenMobileNav?: () => void;
 }
 
 export function TopBar({
   pageName = "Home",
+  user,
   onOpenCommandPalette,
   onOpenMobileNav,
 }: TopBarProps) {
+  const userInitials = initials(user.name);
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-zinc-950/85 backdrop-blur-xl px-4 sm:px-6">
-      {/* Mobile menu */}
       <button
         onClick={onOpenMobileNav}
         aria-label="Open navigation"
@@ -26,7 +40,6 @@ export function TopBar({
         <Menu className="h-4 w-4" />
       </button>
 
-      {/* Page label */}
       <div className="flex-1 min-w-0">
         <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-600 leading-none">
           Dashboard OS
@@ -36,7 +49,6 @@ export function TopBar({
         </h1>
       </div>
 
-      {/* Search / command palette trigger */}
       <button
         onClick={onOpenCommandPalette}
         aria-label="Open command palette"
@@ -56,7 +68,6 @@ export function TopBar({
         </kbd>
       </button>
 
-      {/* Notifications */}
       <button
         aria-label="Notifications"
         className="relative flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50"
@@ -68,13 +79,51 @@ export function TopBar({
         />
       </button>
 
-      {/* User avatar */}
-      <button
-        aria-label="Account menu"
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)_inset] hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
-      >
-        JM
-      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            aria-label="Account menu"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[11px] font-semibold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)_inset] hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
+          >
+            {userInitials}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel className="normal-case tracking-normal py-2 font-normal">
+            <span className="block text-[13px] font-medium text-zinc-100 truncate">
+              {user.name}
+            </span>
+            <span className="block text-[11.5px] text-zinc-500 truncate">
+              {user.email}
+            </span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/app/settings" className="cursor-pointer">
+              <User className="h-3.5 w-3.5 mr-2" />
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/app/settings" className="cursor-pointer">
+              <SettingsIcon className="h-3.5 w-3.5 mr-2" />
+              Settings
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <form action={signOut} className="w-full">
+              <button
+                type="submit"
+                className="flex w-full items-center text-[13px] text-zinc-300"
+              >
+                <LogOut className="h-3.5 w-3.5 mr-2" />
+                Sign out
+              </button>
+            </form>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }
